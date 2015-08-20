@@ -1,0 +1,9 @@
+{
+  "name": "twitch chat test",
+  "description": "Playing with the twitch api",
+  "version": "0.0.1",
+  "author": "Andrew Manley",
+  "dependencies": {
+    "tmi.js": "0.0.21"
+  }
+}
