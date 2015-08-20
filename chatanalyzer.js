@@ -1,5 +1,6 @@
-ChatAnalyzer = function(regex)
+var ChatAnalyzer = function(prefix, regex)
 {
+  this.prefix = prefix;
   this.regex = regex;
   this.counter = 0;
   this.message = "";
@@ -30,7 +31,7 @@ ChatAnalyzer.prototype.UpdateRequired = function()
 
 ChatAnalyzer.prototype.ToString = function()
 {
-  return this.counter + " | <" + this.userName + "> " + this.message;
+  return this.prefix + this.counter + " | <" + this.userName + "> " + this.message;
 };
 
-exports.ChatAnalyzer = ChatAnalyzer;
+module.exports.ChatAnalyzer = ChatAnalyzer;

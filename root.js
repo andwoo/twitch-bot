@@ -13,33 +13,40 @@ var options = {
         username: "",
         password: "oauth:"
     },*/
-    channels: ["#esl_csgo", "#esl_csgob"]
+    //channels: ["#esl_csgo", "#esl_csgob"]
+    channels:["#vulcunfs"]
 };
 
-var vacChecker = new ChatAnalyzer([/[v]+[a]+[c]+/ig]);
-var teamOneChecker = new ChatAnalyzer([/[f]+[n]+[a]+[t]+[i]+[c]+/ig]);
-var teamTwoChecker = new ChatAnalyzer([/[n]+[a]+[v]+[i]+/ig]);
+var analyzers = [
+  new ChatAnalyzer("Number of VACusations: ", [/[v]+[a]+[c]+/ig]),
+  new ChatAnalyzer("Number of KAPPAs:      ", [/[k]+[a]+[p]+[a]+/ig]),
+  new ChatAnalyzer("Number of LOLs:        ", [/[l]+[o]+[l]+/ig]),
+  new ChatAnalyzer("Number of LMAOs:       ", [/[l]+[m]+[a]+[o]+/ig]),
+  new ChatAnalyzer("Number of ROFLs:       ", [/[r]+[o]+[f]+[l]+/ig])
+];
+
 var timedOutCount = 0;
 var timedOutUser = "";
 
 var chat = [""];
-var maxChat = 10;
+var maxChat = 12;
 
 var client = new irc.client(options);
 client.connect();
 
 client.on("chat", function (channel, user, message, self)
 {
-  vacChecker.OnChatMessage(channel, user, message, self);
-  teamOneChecker.OnChatMessage(channel, user, message, self);
-  teamTwoChecker.OnChatMessage(channel, user, message, self);
+  for (var i = 0; i < analyzers.length; i++)
+  {
+    analyzers[i].OnChatMessage(channel, user, message, self);
+  }
 
   if(chat.length >= maxChat)
   {
     chat.shift();
   }
   chat.push("<" + user["display-name"] + "> " +message);
-  
+
   OutputData();
 });
 
@@ -54,9 +61,11 @@ function OutputData()
   //console.log('\033[2J');
   process.stdout.write('\033c');
   console.log("Number of timed out users: " + timedOutCount + " | " + timedOutUser);
-  console.log("Number of VAC mentions:    " + vacChecker.ToString());
-  console.log("Number of Team 1 mentions: " + teamOneChecker.ToString());
-  console.log("Number of Team 2 mentions: " + teamTwoChecker.ToString());
+  for (var i = 0; i < analyzers.length; i++)
+  {
+    console.log(analyzers[i].ToString());
+  }
+
   console.log("");
 
   for(var i = 0; i < chat.length; i++)
