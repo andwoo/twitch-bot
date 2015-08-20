@@ -1,4 +1,5 @@
 var irc = require("tmi.js");
+var ChatAnalyzer = require("./chatanalyzer").ChatAnalyzer;
 
 var options = {
   options: {
@@ -15,90 +16,51 @@ var options = {
     channels: ["#esl_csgo", "#esl_csgob"]
 };
 
-var client = new irc.client(options);
-
-// Connect the client to the server..
-client.connect();
-
-var update = false;
-var vacCount = 0;
-var c9Count = 0;
-var mouzCount = 0;
+var vacChecker = new ChatAnalyzer([/[v]+[a]+[c]+/ig]);
+var teamOneChecker = new ChatAnalyzer([/[f]+[n]+[a]+[t]+[i]+[c]+/ig]);
+var teamTwoChecker = new ChatAnalyzer([/[n]+[a]+[v]+[i]+/ig]);
 var timedOutCount = 0;
-var vacMessage = "";
-var c9Message = "";
-var mouseMessage = "";
 var timedOutUser = "";
+
+var chat = [""];
+var maxChat = 10;
+
+var client = new irc.client(options);
+client.connect();
 
 client.on("chat", function (channel, user, message, self)
 {
-  update = false;
+  vacChecker.OnChatMessage(channel, user, message, self);
+  teamOneChecker.OnChatMessage(channel, user, message, self);
+  teamTwoChecker.OnChatMessage(channel, user, message, self);
 
-  var result = message.match(/[v]+[a]+[c]+/ig);
-  if(result)
+  if(chat.length >= maxChat)
   {
-    vacCount += 1;
-    vacMessage = message;
-    update = true;
+    chat.shift();
   }
-
-  var result = message.match(/[c]+[9]+/ig);
-  if(result)
-  {
-    c9Count += 1;
-    c9Message = message;
-    update = true;
-  }
-  else
-  {
-    var result = message.match(/[c]+[l]+[o]+[u]+[d]+[9]+/ig);
-    if(result)
-    {
-      c9Count += 1;
-      c9Message = message;
-      update = true;
-    }
-  }
-
-  var result = message.match(/[m]+[o]+[u]+[z]+/ig);
-  if(result)
-  {
-    mouzCount += 1;
-    mouseMessage = message;
-    update = true;
-  }
-  else
-  {
-    var result = message.match(/[m]+[o]+[u]+[s]+[e]+/ig);
-    if(result)
-    {
-      mouzCount += 1;
-      mouseMessage = message;
-      update = true;
-    }
-  }
-
-  if(update)
-  {
-    OutputData();
-  }
+  chat.push("<" + user["display-name"] + "> " +message);
+  
+  OutputData();
 });
 
 client.on("timeout", function (channel, username)
 {
   timedOutCount += 1;
   timedOutUser = username;
-  OutputData();
 });
 
 function OutputData()
 {
   //console.log('\033[2J');
   process.stdout.write('\033c');
-  console.log("     Number of timed out users: " + timedOutCount + " | " + timedOutUser);
-  console.log("        Number of VAC mentions: " + vacCount + " | " + vacMessage);
-  console.log("         Number of C9 mentions: " + c9Count + " | " + c9Message);
-  console.log("Number of MouseSports mentions: " + mouzCount + " | " + mouseMessage);
+  console.log("Number of timed out users: " + timedOutCount + " | " + timedOutUser);
+  console.log("Number of VAC mentions:    " + vacChecker.ToString());
+  console.log("Number of Team 1 mentions: " + teamOneChecker.ToString());
+  console.log("Number of Team 2 mentions: " + teamTwoChecker.ToString());
+  console.log("");
+
+  for(var i = 0; i < chat.length; i++)
+  {
+    console.log(chat[i]);
+  }
 }
-/*var timedOutResult = "the user has been timed out".match(/has been timed out/ig);
-console.log(timedOutResult);*/
