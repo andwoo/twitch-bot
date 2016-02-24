@@ -4,7 +4,17 @@
   "version": "0.0.1",
   "author": "Andrew Manley",
   "private": true,
+  "scripts": {
+    "packdev": "SET NODE_ENV=development & webpack -d --watch",
+    "packdevl": "NODE_ENV=development webpack -d --watch",
+    "packprod": "SET NODE_ENV=production & webpack -p",
+    "packprodl": "NODE_ENV=production webpack -p",
+    "startdev": "SET NODE_ENV=development & node --harmony server/startup.js",
+    "startdevl": "NODE_ENV=development node --harmony server/startup.js",
+    "startprod": "SET NODE_ENV=production & pm2 start server/startup.js --node-args='--harmony'",
+    "startprodl": "NODE_ENV=production pm2 start server/startup.js --node-args='--harmony'"
+  },
   "dependencies": {
-    "tmi.js": "0.0.21"
+    "tmi.js": "0.0.27"
   }
 }
